@@ -1,0 +1,46 @@
+
+
+****** HOW WILL OUR PROGRAM WORK? ******
+1. Create two windows using tkinter,
+        * one for the loading page and
+        * another for the main app.
+
+2. The home Page has two options:
+        * play a video
+        * use camera
+
+** FOR PLAY VIDEO OPTION **
+1. Using tkinter filedialog, access the windows file explorer.
+2. The user will select the video.
+3. The video will be played by passing the video path in opencv VideoCapture() command.
+4. Then using YOLO opencv, the program will count the people in the video frame.
+5. If the count surpasses 10, the first 60 seconds of the audio of the video will be recorded. (using sounddevice)
+6. Then using librosa, we will calculate the volume of the sound.
+7. If the volume exceeds a certain limit, a warning sound will be played.
+
+** USING CAMERA **
+1. Once the user selects Use Camera Button, there will be a drop down menu will appear.
+2. In the background, the program will determine the number of cameras the device have.
+3. The choices of the menu will be the camera numbers.
+4. once the user has selected which camera to use, the program will proceed to Video Capturing.
+5. Pass the chosen camera number to opencv VideoCapture() command.
+4. Then using YOLO opencv, the program will count the people in the video frame.
+5. If the count surpasses 10, the first 60 seconds of the audio of the video will be recorded. (using sounddevice)
+6. Then using librosa, we will calculate the volume of the sound.
+7. If the volume exceeds a certain limit, a warning sound will be played.
+
+
+
+
+# Note: Use PyCharm for easier installation of dependencies/modules.
+# Lahat ng modules na kailangan natin ay nasa requirements.txt, just click install once na
+# i-open nyo yong requirements.txt (if PyCharm IDE nyo).
+# Use Python 3.10
+
+
+# Initial plan pa lang yong nasa 'GUI_plan.py' on how we will code the gui
+# Bale ito yong mga functions and classes na gagawin natin.
+# Each classes are written in separate python file.
+
+# Young 'SoundVolume.py' ay yong gagawin natin sa pagrerecord ng sound at
+# calculation ng volume, once maka-detect ng >= 10 na people si opencv.

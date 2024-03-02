@@ -1,0 +1,9 @@
+
+ffpyplayer
+    https://youtu.be/GpPe5qcsVXg?si=BqosekiVAXVwZaMM
+
+opencv
+    https://youtu.be/WgPbbWmnXJ8?si=9Y-z2PTbx6xzjeDB
+
+tkinter
+    https://youtube.com/playlist?list=PLCC34OHNcOtoC6GglhF3ncJ5rLwQrLGnV&si=xJjs1kB22FPgN3jl
