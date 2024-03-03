@@ -58,23 +58,35 @@ class GUI:
         :return: camNum
         """
 
+class LoadingGui(GUI):
+    def display_loading_animation(self):
+    """
+    contains the main window for loading page.
+    
+    Dito ica-call yong mga functions from GUI, 
+    para mabuo yong designs ng loading page.
+    (Ang template ay nasa figma).
+    """
 
-class UiTheme:
-    def base_window(self):
+class HomeGui(GUI):
+
+    def display_home(self):
+    """
+    contains the main window for home page
+    Ica-call lang din mga GUI functions dito
+    para mabuo yong home page. The yong choice
+    ng user about kung anong gusto nyang gamitin 
+    (video or camera ba) ay ipi-print na lang muna
+    console.
+    """
+    def create_buttons(self, parent):
+    """
+    Set the default elements ng button.
+    :return: button
+    """
+    def create_drop_menu(self, parent):
         """
-        contains the base design of the windows,
-        specifically the similarities in the GUI designs of home page and loading page.
-        :return: window
+        Set the default elements of drop
+        down menu
+        :return: drop_menu
         """
-
-class LoadingGui(UiTheme):
-    """
-    contains the main window for loading page
-    adds all the additional designs of loading page (yong wala sa UiTheme).
-    """
-
-class HomeGui(UiTheme):
-    """
-        contains the main window for home page
-        adds all the additional designs of home page (yong wala sa UiTheme).
-    """
