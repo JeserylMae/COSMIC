@@ -1,23 +1,22 @@
 
 import tkinter as tk
+from tkinter import font
 
 class GUI:
 
     def create_text_title(self, parent, text):
-        """
-        create a Tk label
-        set The default font family to "Game of Squids" btw install the font "Game of Squids" in your computer
-        set the default font size, color
-        :return: none
-        """
+        #Define font family, size and color
+        custom_font = font.Font(family="Game of Squids", size=16)
+        #Create label with specified font
+        title_label = tk.Label(parent, text=text, font=custom_font, fg="black") #pakipalitan nalang ng color kung ano gagamitin
+
+        title_label.pack()
 
     def create_text_body(self, parent, text):
-        """
-        create a Tk Label
-        set the default font family to "Roboto Mono" btw install the font "Game of Squids" from Google Fonts.
-        set the default font size, color
-        :return: none
-        """
+        custom_font = font.Font(family="Roboto Mono", size=14)
+
+        body_label = tk.Label(parent, text=text, font=custom_font, fg="white") #same din sa text color
+        body_label.pack()
 
     def create_frame(self, parent, bg_color, bd_width, bd_color):
         """
