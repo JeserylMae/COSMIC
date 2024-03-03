@@ -1,5 +1,5 @@
 
-import gui
+import src.gui
 
 class HomeGui(GUI):
 
