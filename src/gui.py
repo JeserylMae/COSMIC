@@ -18,44 +18,37 @@ class GUI:
         body_label = tk.Label(parent, text=text, font=custom_font, fg="white") #same din sa text color
         body_label.pack()
 
-    def create_frame(self, parent, bg_color, bd_width, bd_color):
-        """
-        create a tk Frame
-        Set the arguments as the elements of the Frame.
-        :return: frame
-        """
+        def create_frame(self, parent, bg_color, bd_width, bd_color):
+        frame = tk.Frame(parent, bg=bg_color, bd=bd_width, relief="solid", highlightbackground=bd_color)
+        frame.pack(pady=10)
+        return frame
 
     def create_image_btn(self, parent, img):
-        """
-
-        :return: button
-        """
+        button = tk.Button(parent, image=img, bg="white", command=lambda: print("Button clicked"))
+        button.image = img
+        button.pack(pady=10)
+        return button
 
     def create_file_dialog(self, parent):
-        """
-        create a Tk filedialog.
-        set the default folder to be opened when the file dialog was opened
-        :return: video_file
-        """
+        video_file = filedialog.askopenfilename(initialdir="/", title="Select file",filetypes=(("video files", "*.mp4;*.avi;*.mkv"), ("all files", "*.*")))
+
+        return video_file
 
     @staticmethod
     def create_window():
-        """
-        Create a window
-        Set the window background
-        Set the windows size
-        :return: window
-        """
+        window = tk.Tk()
+        window.title("Video Processing App")
+        window.geometry("800x600")
+        window.configure(bg="white")
+        return window
 
     @staticmethod
     def count_cameras():
-        """
-        camNum = list()
-
-        create a for-loop that will iterate 10 times.
-        using opencv VideoCapture() get the boolean value of whether the camera i exists.
-        if yes, append to list
-        release cam
-
-        :return: camNum
-        """
+        camNum = []
+        for i in range(10):
+            cap = cv2.VideoCapture(i)
+            if cap.isOpened():
+                camNum.append(i)
+                print(f"Camera {i} is available.")
+            cap.release()
+        return camNum
