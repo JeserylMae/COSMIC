@@ -8,13 +8,10 @@ from time import sleep
 
 class HomeGui(GUI):
     def __init__(self, window, screen_width, screen_height, video_img, cam_img):
+        super().__init__()
         self.__window = window
         self.__window_height = screen_height
         self.__window_width = screen_width
-        self.__black = self.get_black()
-        self.__white = self.get_white()
-        self.__gray = self.get_gray()
-        self.__dark_gray = self.get_darker_gray()
         self.__video_img = video_img
         self.__cam_img = cam_img
         self.__camera_list = list()
@@ -32,10 +29,10 @@ class HomeGui(GUI):
         sleep(0.002)
 
         # Create buttons.
-        open_video_btn = self.__create_buttons(parent=frame, img=self.__video_img, color=self.__dark_gray,
+        open_video_btn = self.__create_buttons(parent=frame, img=self.__video_img, color=self._darker_gray,
                                                label="Open video", X=1.2, Y=3, bd=0,
                                                cmd=self.__create_file_dialog)
-        use_camera_btn = self.__create_buttons(parent=frame, img=self.__cam_img, color=self.__black,
+        use_camera_btn = self.__create_buttons(parent=frame, img=self.__cam_img, color=self._black,
                                                label="Use camera", X=0.85, Y=3, bd=3,
                                                cmd=lambda: self.__create_drop_menu(frame))
 
@@ -56,19 +53,19 @@ class HomeGui(GUI):
     def __create_rectangle(self, parent):
         self.create_frame(parent=parent, height=(self.__window_height - 200), width=(self.__window_width / 1.9),
                           pos_y=(self.__window_height / 16), pos_x=(self.__window_width / 2.6)
-                          ).config(bg=self.__black, bd=2, relief='groove', highlightcolor=self.__white)
+                          ).config(bg=self._black, bd=2, relief='groove', highlightcolor=self._white)
 
     def __create_buttons(self, parent, img, color, label, X, Y, bd, cmd):
         def on_enter(e):
-            button['background'] = self.__gray
+            button['background'] = self._gray
 
         def on_leave(e):
             button['background'] = color
 
-        button = tk.Button(master=parent, bg=color, font=("Roboto Mono", 18), fg=self.__white,
+        button = tk.Button(master=parent, bg=color, font=("Roboto Mono", 18), fg=self._white,
                            height=self.__window_height / 3.5, width=self.__window_height / 3.5,
                            bd=bd, relief='groove', image=img, text=label, compound="top",
-                           highlightcolor=self.__white, activebackground=color,
+                           highlightcolor=self._white, activebackground=color,
                            command=cmd)
 
         button.bind("<Enter>", on_enter)
@@ -87,8 +84,8 @@ class HomeGui(GUI):
         drop_menu = tk.OptionMenu(frame, clicked, *self.__camera_list)
         drop_menu.place(x=int(self.__window_width/1.94), y=(self.__window_height/1.45))
         drop_menu.config(font=("Roboto Mono", 15), width=40, height=2, justify='center',
-                         relief='flat', bg=self.__black, highlightthickness=2,
-                         highlightbackground=self.__gray, fg=self.__white)
+                         relief='flat', bg=self._black, highlightthickness=2,
+                         highlightbackground=self._gray, fg=self._white)
         print(f"Use {clicked.get()}\n")
 
     def __create_file_dialog(self):
