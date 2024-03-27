@@ -5,6 +5,7 @@ from src.gui import ImageWindow
 from src.homeGui import HomeGui
 from src.loadingGui import LoadingGui
 
+
 def main():
     app = tk.Tk()
     # Setting the properties of the window.
