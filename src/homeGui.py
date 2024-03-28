@@ -77,16 +77,23 @@ class HomeGui(GUI):
     def __get_camera_list(self):
         self.__camera_list = Detect.count_cameras()
 
-    def __create_drop_menu(self, frame):
-        clicked = tk.StringVar()
-        clicked.set(self.__camera_list[0])
+    def __select_cam(self):
+        self.selected_cam = self.clicked.get()
+        print(f"Use {self.selected_cam}\n")
 
-        drop_menu = tk.OptionMenu(frame, clicked, *self.__camera_list)
-        drop_menu.place(x=int(self.__window_width/1.94), y=(self.__window_height/1.45))
+    def __create_drop_menu(self, frame):
+        self.clicked = tk.StringVar()
+        self.clicked.set(self.__camera_list[0])
+
+        drop_menu = tk.OptionMenu(frame, self.clicked, *self.__camera_list)
+        drop_menu.place(x=int(self.__window_width/2.1), y=(self.__window_height/1.45))
         drop_menu.config(font=("Roboto Mono", 15), width=40, height=2, justify='center',
                          relief='flat', bg=self._black, highlightthickness=2,
                          highlightbackground=self._gray, fg=self._white)
-        print(f"Use {clicked.get()}\n")
+
+        tk.Button(master=frame, bd=2, bg=self._darker_gray, font=("Roboto Mono", 14), fg=self._white, height=2,
+                  width=10, text="Select", relief=tk.GROOVE, highlightcolor=self._white, command=self.__select_cam
+                  ).place(x=(self.__window_width / 1.325), y=(self.__window_height / 1.45))
 
     def __create_file_dialog(self):
         video_file = filedialog.askopenfilename(
