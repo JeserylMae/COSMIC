@@ -109,15 +109,15 @@ class HomeGui(GUI):
         self.__video_path = video_file
         print(f"Video Path: {self.__video_path}\n")
 
-        cap = Detect.open_video_path(self.__video_path)
-        self.__insert_cv2_video_to_tkapp(cap)
+        cap, sound = Detect.open_video_path(self.__video_path)
+        self.__insert_cv2_video_to_tkapp(cap, sound)
 
     @staticmethod
     def __exit_cmd(cap, window):
         cap.release()
         window.destroy()
 
-    def __insert_cv2_video_to_tkapp(self, cap):
+    def __insert_cv2_video_to_tkapp(self, cap, sound=None):
         width = self.__window_width - 60
         height = self.__window_height - 90
 
@@ -128,7 +128,8 @@ class HomeGui(GUI):
                            bg=self._black)
         canvas.pack()
 
-        detect = Detect(cap=cap, canvas=canvas, window=new_window, window_width=width - 250, window_height=height)
+        detect = Detect(cap=cap, canvas=canvas, window=new_window, window_width=width - 250,
+                        window_height=height, player=sound)
         detect.detect_video()
 
         tk.Button(master=new_window, bg=self._orange, font=("Roboto Mono", 18), relief=tk.SOLID,
