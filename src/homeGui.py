@@ -16,6 +16,7 @@ class HomeGui(GUI):
         self.__cam_img = cam_img
         self.__camera_list = list()
         self.__video_path = " "
+        self.__selected_cam = -1
 
     def display_home(self, cosmic_icon):
         frame = self.create_frame(parent=self.__window, height=self.__window_height - 90,
@@ -28,13 +29,14 @@ class HomeGui(GUI):
         self.__create_rectangle(frame)
         sleep(0.002)
 
-        # Create buttons.
-        open_video_btn = self.__create_buttons(parent=frame, img=self.__video_img, color=self._darker_gray,
-                                               label="Open video", X=1.2, Y=3, bd=0,
-                                               cmd=self.__create_file_dialog)
-        use_camera_btn = self.__create_buttons(parent=frame, img=self.__cam_img, color=self._black,
-                                               label="Use camera", X=0.85, Y=3, bd=3,
-                                               cmd=lambda: self.__create_drop_menu(frame))
+        # Use camera button.
+        self.__create_buttons(parent=frame, img=self.__video_img, color=self._darker_gray,
+                              label="Open video", X=1.2, Y=3, bd=0,
+                              cmd=self.__create_file_dialog)
+        # Open a video button.
+        self.__create_buttons(parent=frame, img=self.__cam_img, color=self._black,
+                              label="Use camera", X=0.85, Y=3, bd=3,
+                              cmd=lambda: self.__create_drop_menu(frame))
 
     def __display_icon_and_title(self, frame, cosmic_icon):
         img_frame = self.create_frame(parent=frame, height=(self.__window_height / 3),
@@ -78,15 +80,19 @@ class HomeGui(GUI):
         self.__camera_list = Detect.count_cameras()
 
     def __select_cam(self):
-        self.selected_cam = self.clicked.get()
-        print(f"Use {self.selected_cam}\n")
+        self.__selected_cam = self.clicked.get()
+        self.__selected_cam = int(self.__selected_cam[-1])
+        print(f"Use Camera {self.__selected_cam}")
+
+        cap = Detect.open_camera(self.__selected_cam)
+        self.__insert_cv2_video_to_tkapp(cap)
 
     def __create_drop_menu(self, frame):
         self.clicked = tk.StringVar()
         self.clicked.set(self.__camera_list[0])
 
         drop_menu = tk.OptionMenu(frame, self.clicked, *self.__camera_list)
-        drop_menu.place(x=int(self.__window_width/2.1), y=(self.__window_height/1.45))
+        drop_menu.place(x=int(self.__window_width / 2.1), y=(self.__window_height / 1.45))
         drop_menu.config(font=("Roboto Mono", 15), width=40, height=2, justify='center',
                          relief='flat', bg=self._black, highlightthickness=2,
                          highlightbackground=self._gray, fg=self._white)
@@ -102,3 +108,29 @@ class HomeGui(GUI):
         )
         self.__video_path = video_file
         print(f"Video Path: {self.__video_path}\n")
+
+        cap = Detect.open_video_path(self.__video_path)
+        self.__insert_cv2_video_to_tkapp(cap)
+
+    @staticmethod
+    def __exit_cmd(cap, window):
+        cap.release()
+        window.destroy()
+
+    def __insert_cv2_video_to_tkapp(self, cap):
+        width = self.__window_width - 60
+        height = self.__window_height - 90
+
+        new_window = self.create_frame(parent=self.__window, height=height, width=width,
+                                       pos_x=(self.__window_width / 64), pos_y=(self.__window_width / 64))
+
+        canvas = tk.Canvas(master=new_window, width=(self.__window_width - 60), height=(self.__window_height - 90),
+                           bg=self._black)
+        canvas.pack()
+
+        detect = Detect(cap=cap, canvas=canvas, window=new_window, window_width=width - 250, window_height=height)
+        detect.detect_video()
+
+        tk.Button(master=new_window, bg=self._orange, font=("Roboto Mono", 18), relief=tk.SOLID,
+                  fg=self._white, height=1, width=13, text="EXIT", command=lambda: HomeGui.__exit_cmd(cap, new_window)
+                  ).place(x=(width-220), y=(height-80))
