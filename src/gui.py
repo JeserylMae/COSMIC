@@ -60,4 +60,3 @@ class GUI:
         return window_width, window_height
 
     def get_black(self): return self._black
-

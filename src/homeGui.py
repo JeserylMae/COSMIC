@@ -1,5 +1,8 @@
+
+
 import tkinter as tk
 from tkinter import filedialog
+import cv2
 from src.gui import GUI
 from src.detect import Detect
 from threading import Thread
@@ -31,11 +34,11 @@ class HomeGui(GUI):
 
         # Use camera button.
         self.__create_buttons(parent=frame, img=self.__video_img, color=self._darker_gray,
-                              label="Open video", X=1.2, Y=3, bd=0,
+                              label="Open video", x=1.2, y=3, bd=0,
                               cmd=self.__create_file_dialog)
         # Open a video button.
         self.__create_buttons(parent=frame, img=self.__cam_img, color=self._black,
-                              label="Use camera", X=0.85, Y=3, bd=3,
+                              label="Use camera", x=0.85, y=3, bd=3,
                               cmd=lambda: self.__create_drop_menu(frame))
 
     def __display_icon_and_title(self, frame, cosmic_icon):
@@ -57,11 +60,13 @@ class HomeGui(GUI):
                           pos_y=(self.__window_height / 16), pos_x=(self.__window_width / 2.6)
                           ).config(bg=self._black, bd=2, relief='groove', highlightcolor=self._white)
 
-    def __create_buttons(self, parent, img, color, label, X, Y, bd, cmd):
+    def __create_buttons(self, parent, img, color, label, x, y, bd, cmd):
         def on_enter(e):
+            print(e)
             button['background'] = self._gray
 
         def on_leave(e):
+            print(e)
             button['background'] = color
 
         button = tk.Button(master=parent, bg=color, font=("Roboto Mono", 18), fg=self._white,
@@ -72,7 +77,7 @@ class HomeGui(GUI):
 
         button.bind("<Enter>", on_enter)
         button.bind("<Leave>", on_leave)
-        button.place(x=int(self.__window_height / X), y=int(self.__window_height / Y))
+        button.place(x=int(self.__window_height / x), y=int(self.__window_height / y))
 
         return button
 
@@ -110,11 +115,6 @@ class HomeGui(GUI):
         cap, sound = Detect.open_video_path(self.__video_path)
         self.__insert_cv2_video_to_tkapp(cap, sound)
 
-    @staticmethod
-    def __exit_cmd(cap, window):
-        cap.release()
-        window.destroy()
-
     def __insert_cv2_video_to_tkapp(self, cap, sound=None):
         width = self.__window_width - 60
         height = self.__window_height - 90
@@ -128,8 +128,5 @@ class HomeGui(GUI):
 
         detect = Detect(cap=cap, canvas=canvas, window=new_window, window_width=width - 250,
                         window_height=height, player=sound)
-        detect.detect_video()
+        Thread(target=detect.detect_video).start()
 
-        tk.Button(master=new_window, bg=self._orange, font=("Roboto Mono", 18), relief=tk.SOLID,
-                  fg=self._white, height=1, width=13, text="EXIT", command=lambda: HomeGui.__exit_cmd(cap, new_window)
-                  ).place(x=(width-220), y=(height-80))
