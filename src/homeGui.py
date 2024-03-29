@@ -82,7 +82,6 @@ class HomeGui(GUI):
     def __select_cam(self):
         self.__selected_cam = self.clicked.get()
         self.__selected_cam = int(self.__selected_cam[-1])
-        print(f"Use Camera {self.__selected_cam}")
 
         cap = Detect.open_camera(self.__selected_cam)
         self.__insert_cv2_video_to_tkapp(cap)
@@ -106,9 +105,8 @@ class HomeGui(GUI):
             initialdir="/", title="Select file",
             filetypes=(("video files", "*.mp4;*.avi;*.mkv;*.wav"), ("all files", "*.*"))
         )
-        self.__video_path = video_file
-        print(f"Video Path: {self.__video_path}\n")
 
+        self.__video_path = video_file
         cap, sound = Detect.open_video_path(self.__video_path)
         self.__insert_cv2_video_to_tkapp(cap, sound)
 

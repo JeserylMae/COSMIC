@@ -19,7 +19,7 @@ class Detect:
 
         if self.__player is not None:
             audio_frame, val = MediaPlayer.get_frame(self.__player)
-            if val == 'eof':
+            if val == 'eof' and self.__player is not None:
                 success = False
 
         if success:
@@ -59,7 +59,6 @@ class Detect:
             cap = cv2.VideoCapture(i)
             if cap.isOpened():
                 cam_num.append(f"Camera {i}")
-                print(f"Camera {i} is available...")
             else:
                 break
 
