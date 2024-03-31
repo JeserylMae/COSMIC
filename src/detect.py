@@ -11,7 +11,6 @@ from ffpyplayer.player import MediaPlayer
 
 class Detect:
     def __init__(self, cap, window, window_width, window_height, player=None):
-        self.__model = YOLO("../Yolo-Weights/yolov8n.pt")
         self.__window_name = "YOLOV8"
         self.__shall_break = False
         self.__cap = cap
@@ -19,6 +18,11 @@ class Detect:
         self.__window_width = window_width
         self.__window_height = window_height
         self.__player = player
+
+        if self.__player is not None:
+            self.__model = YOLO("../Yolo-Weights/yolov8n.pt")
+        else:
+            self.__model = YOLO("../Yolo-Weights/yolov8s.pt")
 
     def detect_video(self):
         self.__configure_cv2_window()
