@@ -34,7 +34,7 @@ class LoadingGui(GUI):
 
     def __display_logo_title(self, frame):
         title_logo_frame = self.create_frame(parent=frame, height=(self.__window_height / 4),
-                                             width=(self.__window_width / 1.4), pos_x=(self.__window_width / 8),
+                                             width=(self.__window_width / 1.4), pos_x=(self.__window_width / 7.5),
                                              pos_y=(self.__window_height / 5))
         title_logo_frame.config(bd=(self.__window_width / 48), highlightcolor=self._gray, relief=tk.SUNKEN)
 
@@ -54,8 +54,8 @@ class LoadingGui(GUI):
         self.__dot_img_label2 = self.create_img_label(parent=parent, img=self.__dot_img2)
         self.__dot_img_label3 = self.create_img_label(parent=parent, img=self.__dot_img2)
 
-        self.__x_position = self.__window_width / 2.1
-        self.__y_position = self.__window_height / 1.25
+        self.__x_position = self.__window_width / 2.05
+        self.__y_position = self.__window_height / 1.15
 
         for i in range(4):
             self.__animate(parent)
