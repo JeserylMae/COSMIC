@@ -2,7 +2,6 @@
 
 import tkinter as tk
 from tkinter import filedialog
-import cv2
 from src.gui import GUI
 from src.detect import Detect
 from threading import Thread
@@ -116,17 +115,14 @@ class HomeGui(GUI):
         self.__insert_cv2_video_to_tkapp(cap, sound)
 
     def __insert_cv2_video_to_tkapp(self, cap, sound=None):
-        width = self.__window_width - 60
-        height = self.__window_height - 90
+        width = self.__window_width - 70
+        height = self.__window_height - 100
 
         new_window = self.create_frame(parent=self.__window, height=height, width=width,
-                                       pos_x=(self.__window_width / 64), pos_y=(self.__window_width / 64))
+                                       pos_x=30, pos_y=40)
+        new_window.config(bd=4, highlightcolor=self._white, relief=tk.GROOVE)
 
-        canvas = tk.Canvas(master=new_window, width=(self.__window_width - 60), height=(self.__window_height - 90),
-                           bg=self._black)
-        canvas.pack()
-
-        detect = Detect(cap=cap, canvas=canvas, window=new_window, window_width=width - 250,
+        detect = Detect(cap=cap, window=new_window, window_width=width - 250,
                         window_height=height, player=sound)
         Thread(target=detect.detect_video).start()
 
