@@ -111,8 +111,10 @@ class HomeGui(GUI):
         )
 
         self.__video_path = video_file
-        cap, sound = Detect.open_video_path(self.__video_path)
-        self.__insert_cv2_video_to_tkapp(cap, sound)
+
+        if self.__video_path:
+            cap, sound = Detect.open_video_path(self.__video_path)
+            self.__insert_cv2_video_to_tkapp(cap, sound)
 
     def __insert_cv2_video_to_tkapp(self, cap, sound=None):
         width = self.__window_width - 70
@@ -123,6 +125,6 @@ class HomeGui(GUI):
         new_window.config(bd=4, highlightcolor=self._white, relief=tk.GROOVE)
 
         detect = Detect(cap=cap, window=new_window, window_width=width - 250,
-                        window_height=height, player=sound)
+                        window_height=height, player_path=sound)
         Thread(target=detect.detect_video).start()
 

@@ -1,8 +1,8 @@
-
 import cv2
 import cvzone
 import win32gui
 import win32con
+import numpy as np
 import tkinter as tk
 from math import ceil
 from ultralytics import YOLO
@@ -10,16 +10,16 @@ from ffpyplayer.player import MediaPlayer
 
 
 class Detect:
-    def __init__(self, cap, window, window_width, window_height, player=None):
+    def __init__(self, cap, window, window_width, window_height, player_path=None):
         self.__window_name = "YOLOV8"
         self.__shall_break = False
         self.__cap = cap
         self.__window = window
         self.__window_width = window_width
         self.__window_height = window_height
-        self.__player = player
+        self.__player_path = player_path
 
-        if self.__player is not None:
+        if self.__player_path is not None:
             self.__model = YOLO("../Yolo-Weights/yolov8n.pt")
         else:
             self.__model = YOLO("../Yolo-Weights/yolov8s.pt")
@@ -29,52 +29,57 @@ class Detect:
         self.__create_button()  # For exit button.
 
         # Display the video with object detection.
-        self.__display_video_to_window()
+        if self.__player_path is None:
+            self.__display_camera_video_to_window()
+        else:
+            self.__display_recorded_video_to_window()
+            MediaPlayer.close_player(self.__player)
 
         # Close the MediaPlayer and go back to the home window.
         self.__cap.release()
         cv2.destroyAllWindows()
         self.__window.destroy()
-        MediaPlayer.close_player(self.__player)
 
-    def __display_video_to_window(self):
+    def __display_camera_video_to_window(self):
         while self.__cap.isOpened() and not self.__shall_break:
-            self.success, self.frame = self.__cap.read()
-            self.results = self.__model(self.frame, stream=True)
+            success, frame = self.__cap.read()
+            results = self.__model(frame, stream=True)
 
-            if self.__player is not None:
-                audio_frame, val = MediaPlayer.get_frame(self.__player)
-                if val == 'eof' and self.__player is not None:
-                    self.success = False
-
-            if self.success:
-                self.__plot_cv_points()
-                cv2.imshow(self.__window_name, self.frame)
+            if success:
+                Detect.__plot_cv_points(results, frame)
+                cv2.imshow(self.__window_name, frame)
                 cv2.waitKey(1)
             else:
                 break
 
-    def __plot_cv_points(self):
-        for r in self.results:
-            boxes = r.boxes
-            for box in boxes:
-                # Get points of the detected object (Bounding Box).
-                x1, y1, x2, y2 = box.xyxy[0]
-                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-                w, h = x2 - x1, y2 - y1
+    def __display_recorded_video_to_window(self):
+        self.__player = MediaPlayer(self.__player_path)
 
-                # Draw rectangles for the detected object.
-                cvzone.cornerRect(self.frame, (x1, y1, w, h))
+        while True and not self.__shall_break:
+            frame, success = self.__player.get_frame()
 
-                # Get confidence level of detection.
-                conf = ceil(box.conf[0] * 100) / 100
+            if success == 'eof':
+                break
+            elif frame is not None:
+                # Extract frame data and shape
+                video_frame = frame[0]
+                frame_w, frame_h = video_frame.get_size()
 
-                # Get class name.
-                cls = int(box.cls[0])
+                # Convert frame data to a bytes object
+                frame_bytes = video_frame.to_bytearray()[0]
 
-                # Display Confidence level and class name of detected object.
-                cvzone.putTextRect(self.frame, f'{classNames[cls]} - {conf}', (max(0, x1), max(35, y1)),
-                                   1.5, 2)
+                # Decode the bytes object to a NumPy array
+                np_arr = np.frombuffer(frame_bytes, np.uint8).reshape(frame_h, frame_w, 3)
+
+                # Convert color format from RGB to BGR
+                np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
+
+                results = self.__model(np_arr_bgr, stream=True)
+
+                # Display the frame
+                Detect.__plot_cv_points(results, np_arr_bgr)
+                cv2.imshow(self.__window_name, np_arr_bgr)
+                cv2.waitKey(100)  # Adjust frame rate as needed
 
     def __configure_cv2_window(self):
         # Create a window with a border
@@ -83,16 +88,16 @@ class Detect:
 
         # Set the screen position of the window
         hwnd = win32gui.FindWindow(None, self.__window_name)
-        win32gui.MoveWindow(hwnd, 45, 85, self.__window_width-50, self.__window_height-45, True)
+        win32gui.MoveWindow(hwnd, 45, 85, self.__window_width - 50, self.__window_height - 45, True)
 
         # Modify the window style to remove the maximizable button
         style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
-        style &= ~win32con.WS_CAPTION       # Remove title bar
-        style &= ~win32con.WS_THICKFRAME    # Remove sizing border
-        style &= ~win32con.WS_SYSMENU       # Remove system menu
-        style &= ~win32con.WS_MINIMIZEBOX   # Remove minimize button
-        style &= ~win32con.WS_MAXIMIZEBOX   # Remove maximize button
-        style &= ~win32con.WS_BORDER        # Remove window border
+        style &= ~win32con.WS_CAPTION  # Remove title bar
+        style &= ~win32con.WS_THICKFRAME  # Remove sizing border
+        style &= ~win32con.WS_SYSMENU  # Remove system menu
+        style &= ~win32con.WS_MINIMIZEBOX  # Remove minimize button
+        style &= ~win32con.WS_MAXIMIZEBOX  # Remove maximize button
+        style &= ~win32con.WS_BORDER  # Remove window border
         win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, style)
 
         # Set the window position to be on top of all other windows
@@ -111,7 +116,7 @@ class Detect:
     @staticmethod
     def open_video_path(path):
         cap = cv2.VideoCapture(path)
-        sound = MediaPlayer(path)
+        sound = path
 
         return cap, sound
 
@@ -136,6 +141,29 @@ class Detect:
             cap.release()
         return cam_num
 
+    @staticmethod
+    def __plot_cv_points(results, frame):
+        for r in results:
+            boxes = r.boxes
+            for box in boxes:
+                # Get points of the detected object (Bounding Box).
+                x1, y1, x2, y2 = box.xyxy[0]
+                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                w, h = x2 - x1, y2 - y1
+
+                # Draw rectangles for the detected object.
+                cvzone.cornerRect(frame, (x1, y1, w, h))
+
+                # Get confidence level of detection.
+                conf = ceil(box.conf[0] * 100) / 100
+
+                # Get class name.
+                cls = int(box.cls[0])
+
+                # Display Confidence level and class name of detected object.
+                cvzone.putTextRect(frame, f'{classNames[cls]} - {conf}',
+                                   (max(0, x1), max(35, y1)),
+                                   1.5, 2)
 
 classNames = [
     "person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
@@ -147,5 +175,5 @@ classNames = [
     "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair",
     "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse",
     "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
-    "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
+    "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "pen"
 ]
