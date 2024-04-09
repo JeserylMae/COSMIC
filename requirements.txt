@@ -1,12 +1,12 @@
 
 #  Modules Required to Run Program
 
-opencv-python~=4.9.0.80
+pywin32==305
+opencv-python==4.8.1.78
 ultralytics==8.1.0
 cvzone==1.5.6
 ffpyplayer==4.5.0
 librosa==0.10.1
 sounddevice==0.4.6
 pillow~=10.2.0
-pywin32~=306
 numpy~=1.26.4
