@@ -1,5 +1,6 @@
 import pyaudio
 import numpy as np
+import librosa
 
 class SoundDetector:
     def __init__(self, threshold=0.1, chunk_size=1024, format=pyaudio.paInt16, channels=1, rate=44100, max_record_time=30):
@@ -46,6 +47,13 @@ class SoundDetector:
         except KeyboardInterrupt:
             pass
         return frames
+
+     def calculate_intensity(self, data):
+        rms_amplitude = librosa.feature.rms(y=np.frombuffer(data, dtype=np.int16))[0]
+        intensity_db = librosa.amplitude_to_db(rms_amplitude, ref=np.max)[0]
+        return intensity_db
+
+
 
 if _name_ == "_main_":
     detector = SoundDetector()
