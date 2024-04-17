@@ -18,6 +18,7 @@ class Detect:
         self.__window_width = window_width
         self.__window_height = window_height
         self.__player_path = player_path
+        self.__person_count = 0  # Initialize person count
 
         if self.__player_path is not None:
             self.__model = YOLO("../Yolo-Weights/yolov8n.pt")
@@ -38,7 +39,7 @@ class Detect:
         # Close the MediaPlayer and go back to the home window.
         self.__cap.release()
         cv2.destroyAllWindows()
-        self.__window.destroy()
+        self.__window.quit()
 
     def __display_camera_video_to_window(self):
         while self.__cap.isOpened() and not self.__shall_break:
@@ -46,8 +47,9 @@ class Detect:
             results = self.__model(frame, stream=True)
 
             if success:
-                Detect.__plot_cv_points(results, frame)
-                cv2.imshow(self.__window_name, frame)
+                self.__person_count = 0  # Reset person count for each frame
+                self.__plot_cv_points(results, frame)
+                self.__display_with_person_count(frame)  # Display with person count
                 cv2.waitKey(1)
             else:
                 break
@@ -77,8 +79,9 @@ class Detect:
                 results = self.__model(np_arr_bgr, stream=True)
 
                 # Display the frame
-                Detect.__plot_cv_points(results, np_arr_bgr)
-                cv2.imshow(self.__window_name, np_arr_bgr)
+                self.__person_count = 0  # Reset person count for each frame
+                self.__plot_cv_points(results, np_arr_bgr)
+                self.__display_with_person_count(np_arr_bgr)  # Display with person count
                 cv2.waitKey(100)  # Adjust frame rate as needed
 
     def __configure_cv2_window(self):
@@ -141,8 +144,7 @@ class Detect:
             cap.release()
         return cam_num
 
-    @staticmethod
-    def __plot_cv_points(results, frame):
+    def __plot_cv_points(self, results, frame):  # Adjusted to instance method
         for r in results:
             boxes = r.boxes
             for box in boxes:
@@ -160,10 +162,41 @@ class Detect:
                 # Get class name.
                 cls = int(box.cls[0])
 
+                # Increment person count if a person is detected
+                if classNames[cls] == "person":
+                    self.__person_count += 1  # Accessing instance attribute
+
                 # Display Confidence level and class name of detected object.
                 cvzone.putTextRect(frame, f'{classNames[cls]} - {conf}',
                                    (max(0, x1), max(35, y1)),
                                    1.5, 2)
+
+    def __display_with_person_count(self, frame):
+        # Display the frame
+        cv2.putText(frame, f'Persons detected: {self.__person_count}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.imshow(self.__window_name, frame)
+
+# Example usage:
+if __name__ == "__main__":
+    # Example: Open camera
+    cam_id = 0  # Change this according to your camera id
+    cap = cv2.VideoCapture(cam_id)
+    cap.set(3, 1280)
+    cap.set(4, 720)
+
+    # Example: Create Tkinter window
+    window_width, window_height = 800, 600
+    root = tk.Tk()
+    root.title("YOLO Object Detection")
+    root.geometry(f"{window_width}x{window_height}")
+
+    # Create Detect object and start detection
+    detect_obj = Detect(cap, root, window_width, window_height)
+    detect_obj.detect_video()
+
+    # Release the camera and close OpenCV windows
+    cap.release()
+    cv2.destroyAllWindows()
 
 classNames = [
     "person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
@@ -173,7 +206,7 @@ classNames = [
     "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket",
     "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
     "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair",
-    "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse",
+    "sofa", "potted plant", "bed", "dining table", "toilet", "tv monitor", "laptop", "mouse",
     "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
     "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "pen"
 ]
