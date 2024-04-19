@@ -4,9 +4,26 @@ import win32gui
 import win32con
 import numpy as np
 import tkinter as tk
+import time
 from math import ceil
 from ultralytics import YOLO
 from ffpyplayer.player import MediaPlayer
+from src.sound import SoundDetector
+from threading import Thread
+
+
+def elapsed_time():
+    SoundDetector().detect_sound()
+    start_time = time.time()
+
+    while True:
+        current_time = time.time()
+        etime = current_time - start_time
+
+        if etime >= 30:
+            break
+        else:
+            time.sleep(1)
 
 
 class Detect:
@@ -39,7 +56,7 @@ class Detect:
         # Close the MediaPlayer and go back to the home window.
         self.__cap.release()
         cv2.destroyAllWindows()
-        self.__window.quit()
+        self.__window.destroy()
 
     def __display_camera_video_to_window(self):
         while self.__cap.isOpened() and not self.__shall_break:
@@ -172,31 +189,13 @@ class Detect:
                                    1.5, 2)
 
     def __display_with_person_count(self, frame):
-        # Display the frame
-        cv2.putText(frame, f'Persons detected: {self.__person_count}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f'Persons detected: {self.__person_count}', (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
         cv2.imshow(self.__window_name, frame)
 
-# Example usage:
-if __name__ == "__main__":
-    # Example: Open camera
-    cam_id = 0  # Change this according to your camera id
-    cap = cv2.VideoCapture(cam_id)
-    cap.set(3, 1280)
-    cap.set(4, 720)
+        if self.__person_count >= 10:
+            Thread(target=elapsed_time).start()
 
-    # Example: Create Tkinter window
-    window_width, window_height = 800, 600
-    root = tk.Tk()
-    root.title("YOLO Object Detection")
-    root.geometry(f"{window_width}x{window_height}")
-
-    # Create Detect object and start detection
-    detect_obj = Detect(cap, root, window_width, window_height)
-    detect_obj.detect_video()
-
-    # Release the camera and close OpenCV windows
-    cap.release()
-    cv2.destroyAllWindows()
 
 classNames = [
     "person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
