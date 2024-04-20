@@ -23,4 +23,3 @@ class Sound:
             wf.setsampwidth(2)  # 16-bit PCM
             wf.setframerate(self.__fs)
             wf.writeframes(self.__recording.tobytes())
-
