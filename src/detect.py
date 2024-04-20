@@ -8,22 +8,8 @@ import time
 from math import ceil
 from ultralytics import YOLO
 from ffpyplayer.player import MediaPlayer
-from src.sound import SoundDetector
+from src.sound import Sound
 from threading import Thread
-
-
-def elapsed_time():
-    SoundDetector().detect_sound()
-    start_time = time.time()
-
-    while True:
-        current_time = time.time()
-        etime = current_time - start_time
-
-        if etime >= 30:
-            break
-        else:
-            time.sleep(1)
 
 
 class Detect:
@@ -36,6 +22,8 @@ class Detect:
         self.__window_height = window_height
         self.__player_path = player_path
         self.__person_count = 0  # Initialize person count
+        self.__is_recording = False
+        self.__count_times = 0
 
         if self.__player_path is not None:
             self.__model = YOLO("../Yolo-Weights/yolov8n.pt")
@@ -133,34 +121,6 @@ class Detect:
                         command=self.__exit_cmd)
         bbb.place(x=(self.__window_width - 8), y=(self.__window_height - 85))
 
-    @staticmethod
-    def open_video_path(path):
-        cap = cv2.VideoCapture(path)
-        sound = path
-
-        return cap, sound
-
-    @staticmethod
-    def open_camera(cam_id):
-        cap = cv2.VideoCapture(cam_id)
-        cap.set(3, 1280)
-        cap.set(4, 720)
-
-        return cap
-
-    @staticmethod
-    def count_cameras():
-        cam_num = list()
-        for i in range(10):
-            cap = cv2.VideoCapture(i)
-            if cap.isOpened():
-                cam_num.append(f"Camera {i}")
-            else:
-                break
-
-            cap.release()
-        return cam_num
-
     def __plot_cv_points(self, results, frame):  # Adjusted to instance method
         for r in results:
             boxes = r.boxes
@@ -188,13 +148,66 @@ class Detect:
                                    (max(0, x1), max(35, y1)),
                                    1.5, 2)
 
+    def __elapsed_time(self):
+        self.__is_recording = True
+
+    def __trigger_sound_detection(self):
+        sound = Sound()
+        if self.__person_count >= 1 and self.__is_recording:
+            start_time = time.time()
+            Thread(target=sound.sound_detect).start()
+
+            while True:
+                current_time = time.time()
+                etime = current_time - start_time
+                if etime >= 300 or self.__shall_break:
+                    break
+                else:
+                    time.sleep(1)
+
+        sound.save_audio_as_wav()
+        self.__is_recording = False
+        self.__count_times = 0
+
     def __display_with_person_count(self, frame):
         cv2.putText(frame, f'Persons detected: {self.__person_count}', (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
         cv2.imshow(self.__window_name, frame)
 
-        if self.__person_count >= 10:
-            Thread(target=elapsed_time).start()
+        if self.__person_count >= 1:
+            self.__count_times += 1
+
+        if self.__count_times == 1:
+            self.__is_recording = True
+            Thread(target=self.__trigger_sound_detection).start()
+
+    @staticmethod
+    def open_video_path(path):
+        cap = cv2.VideoCapture(path)
+        sound = path
+
+        return cap, sound
+
+    @staticmethod
+    def open_camera(cam_id):
+        cap = cv2.VideoCapture(cam_id)
+        cap.set(3, 1280)
+        cap.set(4, 720)
+
+        return cap
+
+    @staticmethod
+    def count_cameras():
+        cam_num = list()
+        for i in range(10):
+            cap = cv2.VideoCapture(i)
+            if cap.isOpened():
+                cam_num.append(f"Camera {i}")
+            else:
+                break
+
+            cap.release()
+        return cam_num
 
 
 classNames = [
