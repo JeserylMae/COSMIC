@@ -24,6 +24,7 @@ class Detect:
         self.__person_count = 0  # Initialize person count
         self.__is_recording = False
         self.__count_times = 0
+        self.__num_of_students = 10
 
         if self.__player_path is not None:
             self.__model = YOLO("../Yolo-Weights/yolov8n.pt")
@@ -153,14 +154,14 @@ class Detect:
 
     def __trigger_sound_detection(self):
         sound = Sound()
-        if self.__person_count >= 1 and self.__is_recording:
+        if self.__person_count >= self.__num_of_students and self.__is_recording:
             start_time = time.time()
             Thread(target=sound.sound_detect).start()
 
             while True:
                 current_time = time.time()
                 etime = current_time - start_time
-                if etime >= 300 or self.__shall_break:
+                if etime >= 30 or self.__shall_break:
                     break
                 else:
                     time.sleep(1)
@@ -168,16 +169,19 @@ class Detect:
         sound.save_audio_as_wav()
         self.__is_recording = False
         self.__count_times = 0
+        if not self.__shall_break:
+            sound.calculate_sound_intensity()
+            sound.trigger_alarm_message()
 
     def __display_with_person_count(self, frame):
         cv2.putText(frame, f'Persons detected: {self.__person_count}', (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
         cv2.imshow(self.__window_name, frame)
 
-        if self.__person_count >= 1:
+        if self.__person_count >= self.__num_of_students:
             self.__count_times += 1
 
-        if self.__count_times == 1:
+        if self.__count_times == self.__num_of_students:
             self.__is_recording = True
             Thread(target=self.__trigger_sound_detection).start()
 
